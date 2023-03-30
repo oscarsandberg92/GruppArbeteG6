@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ShopGeneral.Data;
 using ShopGeneral.Services;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 var builder = ConsoleApp.CreateBuilder(args);
 builder.ConfigureServices((ctx, services) =>
@@ -18,8 +19,13 @@ builder.ConfigureServices((ctx, services) =>
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
+    services.AddTransient<IPricingService, PricingService>();
+    services.AddTransient<IProductService, ProductService>();
     services.AddTransient<IAgreementService, AgreementService>();
+
+    services.AddAutoMapper(typeof(Program));
+    services.AddAutoMapper(typeof(ShopGeneral.Infrastructure.Profiles.ProductProfile));
+
     services.AddTransient<DataInitializer>();
     // Using Cysharp/ZLogger for logging to file
     //services.AddLogging(logging =>
