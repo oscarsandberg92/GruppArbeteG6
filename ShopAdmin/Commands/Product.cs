@@ -11,14 +11,15 @@ namespace ShopAdmin.Commands
         private readonly IProductService _productService;
         private readonly string filePath;
         private readonly string filePathMissingImage;
-
-        public Product(ILogger<ProductServiceModel> logger, IProductService productService)
+        private readonly HttpClient client;
+    public Product(ILogger<ProductServiceModel> logger, IProductService productService)
         {
             _logger = logger;
             _productService = productService;
             string dateString = DateTime.Now.ToShortDateString().Replace("-", "");
             filePath = $"..\\..\\..\\outfiles\\pricerunner\\{dateString}.txt";
             filePathMissingImage = $"..\\..\\..\\outfiles\\products\\missingimages-{dateString}.txt";
+            client = new HttpClient();
         }
 
         public void Export(string to)
@@ -55,7 +56,7 @@ namespace ShopAdmin.Commands
             List<string> productIdMissingImage= new List<string>();
             foreach (var p in products)
             {
-                var result = CheckimageUrl(p.ImageUrl);
+                var result = IsImageUrlValid(p.ImageUrl);
                 if (!result.Result)
                 {
                     productIdMissingImage.Add(p.Id.ToString());
@@ -64,11 +65,10 @@ namespace ShopAdmin.Commands
             File.WriteAllLines(filePathMissingImage, productIdMissingImage);
         }
 
-        public async Task <bool> CheckimageUrl(string imageUrl)
+        public async Task <bool> IsImageUrlValid(string imageUrl)
         {
             try
             {
-                using HttpClient client = new HttpClient();
                 using HttpResponseMessage response = await client.GetAsync(imageUrl);
                 response.EnsureSuccessStatusCode();
                 return true;
