@@ -2,6 +2,7 @@
 using ShopAdmin.Model;
 using ShopGeneral.Services;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace ShopAdmin.Commands
 {
@@ -9,16 +10,11 @@ namespace ShopAdmin.Commands
     {
         private readonly ILogger<ProductServiceModel> _logger;
         private readonly IProductService _productService;
-        private readonly string filePath;
-        private readonly string filePathMissingImage;
         private readonly HttpClient client;
     public Product(ILogger<ProductServiceModel> logger, IProductService productService)
         {
             _logger = logger;
             _productService = productService;
-            string dateString = DateTime.Now.ToShortDateString().Replace("-", "");
-            filePath = $"..\\..\\..\\outfiles\\pricerunner\\{dateString}.txt";
-            filePathMissingImage = $"..\\..\\..\\outfiles\\products\\missingimages-{dateString}.txt";
             client = new HttpClient();
         }
 
@@ -45,6 +41,11 @@ namespace ShopAdmin.Commands
 
             string json = JsonConvert.SerializeObject(result, Formatting.Indented);
 
+            string directoryPath = $"outfiles\\{to}\\";
+            Directory.CreateDirectory(directoryPath);
+
+            string dateString = DateTime.Now.ToShortDateString().Replace("-", "");
+            string filePath = $"{directoryPath}{dateString}.txt";
             File.WriteAllText(filePath, json);
 
             _logger.LogInformation("Export ending");
@@ -52,6 +53,7 @@ namespace ShopAdmin.Commands
 
         public void Verifyimage()
         {
+            _logger.LogInformation("Verify image starting");
             var products = _productService.GetAllProducts();
             List<string> productIdMissingImage= new List<string>();
             foreach (var p in products)
@@ -62,7 +64,16 @@ namespace ShopAdmin.Commands
                     productIdMissingImage.Add(p.Id.ToString());
                 }
             }
-            File.WriteAllLines(filePathMissingImage, productIdMissingImage);
+
+            string directoryPath = "outfiles\\products\\";
+            Directory.CreateDirectory(directoryPath);
+
+            string dateString = DateTime.Now.ToShortDateString().Replace("-", "");
+            string filePath = $"{directoryPath}missingimages-{dateString}.txt";
+
+            File.WriteAllLines(filePath, productIdMissingImage);
+
+            _logger.LogInformation("Verify image ending");
         }
 
         public async Task <bool> IsImageUrlValid(string imageUrl)
