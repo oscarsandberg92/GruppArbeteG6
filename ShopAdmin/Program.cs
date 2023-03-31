@@ -22,6 +22,8 @@ builder.ConfigureServices((ctx, services) =>
     services.AddTransient<IPricingService, PricingService>();
     services.AddTransient<IProductService, ProductService>();
     services.AddTransient<IAgreementService, AgreementService>();
+    services.AddTransient<ICategoryService, CategoryService>();
+
 
     services.AddAutoMapper(typeof(Program));
     services.AddAutoMapper(typeof(ShopGeneral.Infrastructure.Profiles.ProductProfile));
