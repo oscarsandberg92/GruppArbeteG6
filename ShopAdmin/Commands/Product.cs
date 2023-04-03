@@ -76,7 +76,7 @@ namespace ShopAdmin.Commands
             _logger.LogInformation("Verify image ending");
         }
 
-        public async Task <bool> IsImageUrlValid(string imageUrl)
+        private async Task <bool> IsImageUrlValid(string imageUrl)
         {
             try
             {
