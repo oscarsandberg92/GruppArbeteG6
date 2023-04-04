@@ -1,13 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using ShopAdmin.Commands;
-using ShopGeneral.Data;
 using ShopGeneral.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace ShopAdmin.Tests.Commands
 {
@@ -30,5 +24,57 @@ namespace ShopAdmin.Tests.Commands
                 _mockCategoryService.Object
                 );
         }
+
+        [TestMethod]
+        public void when_check_empty_file_should_exist()
+        {
+            // Arrange
+            string dateString = DateTime.Now.ToShortDateString().Replace("-", "");
+            string fileName = $"missingproducts-{dateString}.txt";
+
+            List<ShopGeneral.Data.Category> categories = new();
+            categories.Add(new ShopGeneral.Data.Category { Name = "TestCategory1", Id = 1, Icon = "testIcon" });
+            categories.Add(new ShopGeneral.Data.Category { Name = "TestCategory2", Id = 2, Icon = "testIcon2" });
+
+
+            List<ProductServiceModel> products = new();
+            products.Add(new ProductServiceModel { CategoryName = "TestCategory1" });
+
+            _mockProductService.Setup(s => s.GetAllProducts()).Returns(products);
+            _mockCategoryService.Setup(s => s.GetAllCategories()).Returns(categories);
+
+            // Act
+            _sut.Checkempty();
+
+            // Assert
+            Assert.IsTrue(File.Exists($"outfiles\\category\\{fileName}"));
+        }
+
+        [TestMethod]
+        public void when_check_empty_file_should_contain_all_empty_categories()
+        {
+            // Arrange
+            string dateString = DateTime.Now.ToShortDateString().Replace("-", "");
+            string fileName = $"missingproducts-{dateString}.txt";
+            string expectedCategoryName = "TestCategory2";
+
+            List<ShopGeneral.Data.Category> categories = new();
+            categories.Add(new ShopGeneral.Data.Category { Name = "TestCategory1", Id = 1, Icon = "testIcon" });
+            categories.Add(new ShopGeneral.Data.Category { Name = expectedCategoryName, Id = 2, Icon = "testIcon2" });
+
+
+            List<ProductServiceModel> products = new();
+            products.Add(new ProductServiceModel { CategoryName = "TestCategory1" });
+
+            _mockProductService.Setup(s => s.GetAllProducts()).Returns(products);
+            _mockCategoryService.Setup(s => s.GetAllCategories()).Returns(categories);
+
+            // Act
+            _sut.Checkempty();
+            var emptyCategoryNames = File.ReadLines($"outfiles\\category\\{fileName}").ToList();
+            // Assert
+            Assert.AreEqual(expectedCategoryName, emptyCategoryNames[0]);
+        }
+
     }
 }
