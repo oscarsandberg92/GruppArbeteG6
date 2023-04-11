@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using ShopGeneral.Data;
 using ShopGeneral.Services;
 using Microsoft.EntityFrameworkCore;
-
+using ShopAdmin.Commands;
+using ShopAdmin.Services;
 
 var builder = ConsoleApp.CreateBuilder(args);
 builder.ConfigureServices((ctx, services) =>
@@ -23,6 +24,7 @@ builder.ConfigureServices((ctx, services) =>
     services.AddTransient<IProductService, ProductService>();
     services.AddTransient<IAgreementService, AgreementService>();
     services.AddTransient<ICategoryService, CategoryService>();
+    services.AddTransient<IEmailService, EmailService>();
    
 
     services.AddAutoMapper(typeof(Program));
